@@ -1,7 +1,5 @@
 package io.oriel;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
@@ -27,7 +25,7 @@ public abstract class Async<A> {
    * the computation in the process.
    */
   public CompletableFuture<A> toFuture() {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("Please implement!");
   }
 
   /**
@@ -49,7 +47,7 @@ public abstract class Async<A> {
    * <a href="https://en.wikipedia.org/wiki/Functor">Functor</a>.
    */
   public <B> Async<B> map(Function<A, B> f) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("Please implement!");
   }
 
   /**
@@ -71,7 +69,7 @@ public abstract class Async<A> {
    * <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">Monad</a>.
    */
   public <B> Async<B> flatMap(Function<A, Async<B>> f) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("Please implement!");
   }
 
   /**
@@ -90,7 +88,7 @@ public abstract class Async<A> {
    * </pre>
    */
   public static <A, B, C> Async<C> parMap2(Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("Please implement!");
   }
 
   /**
@@ -100,7 +98,7 @@ public abstract class Async<A> {
    * SHOULD implement in terms of `flatMap`.
    */
   public static <A> Async<A[]> sequence(Async<A>[] list) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("Please implement!");
   }
 
   /**
@@ -110,7 +108,7 @@ public abstract class Async<A> {
    * SHOULD implement in terms of `parMap2`.
    */
   public static <A> Async<A[]> parallel(Async<A>[] list) {
-    throw new NotImplementedException();
+    throw new UnsupportedOperationException("Please implement!");
   }
 
   /**
