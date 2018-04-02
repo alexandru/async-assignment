@@ -6,6 +6,17 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * The `Async` data type is a lazy `Future`, i.e. a way to describe
+ * asynchronous computations.
+ *
+ * It is described by {@link Async#run(Callback)}, it's characteristic
+ * function. See {@link Async#eval(Executor, Supplier)} for how `Async`
+ * values can be built.
+ *
+ * The assignment, should you wish to accept it, is to fill in the implementation
+ * for all functions that are marked with `throw UnsupportedOperationException`.
+ */
 public abstract class Async<A> {
   /** Execution context. */
   public final Executor context;
