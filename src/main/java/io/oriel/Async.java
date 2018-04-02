@@ -1,5 +1,6 @@
 package io.oriel;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
@@ -114,7 +115,7 @@ public abstract class Async<A> {
    *
    * SHOULD implement in terms of `flatMap` ;-)
    */
-  public static <A> Async<A[]> sequence(Executor ec, Async<A>[] list) {
+  public static <A> Async<List<A>> sequence(Executor ec, List<Async<A>> list) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -127,7 +128,7 @@ public abstract class Async<A> {
    *
    * SHOULD implement in terms of `parMap2` ;-)
    */
-  public static <A> Async<A[]> parallel(Executor ec, Async<A>[] list) {
+  public static <A> Async<List<A>> parallel(Executor ec, List<Async<A>> list) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }

@@ -19,8 +19,8 @@ public class AsyncTests {
   }
 
   @After
-  public void tearDown() throws InterruptedException {
-    ec.awaitTermination(10, TimeUnit.SECONDS);
+  public void tearDown() {
+    ec.shutdown();
   }
 
   @Test
@@ -86,13 +86,13 @@ public class AsyncTests {
   @Test
   @SuppressWarnings("unchecked")
   public void sequence() {
-    final Async<Integer>[] list = (Async<Integer>[]) new Object[count];
+    final ArrayList<Async<Integer>> list = new ArrayList<>(count);
     for (int i = 0; i < count; i++) {
-      list[i] = Async.eval(ec, () -> 1 + 1);
+      list.add(Async.eval(ec, () -> 1 + 1));
     }
 
     Async<Integer> sum = Async.sequence(ec, list)
-      .map(l -> Arrays.stream(l).reduce(0, (x, y) -> x + y));
+      .map(l -> l.stream().reduce(0, (x, y) -> x + y));
 
     assertEquals(await(sum).intValue(), count * 2);
   }
@@ -100,13 +100,13 @@ public class AsyncTests {
   @Test
   @SuppressWarnings("unchecked")
   public void parallel() {
-    final Async<Integer>[] list = (Async<Integer>[]) new Object[count];
+    final ArrayList<Async<Integer>> list = new ArrayList<>(count);
     for (int i = 0; i < count; i++) {
-      list[i] = Async.eval(ec, () -> 1 + 1);
+      list.add(Async.eval(ec, () -> 1 + 1));
     }
 
     Async<Integer> sum = Async.parallel(ec, list)
-      .map(l -> Arrays.stream(l).reduce(0, (x, y) -> x + y));
+      .map(l -> l.stream().reduce(0, (x, y) -> x + y));
 
     assertEquals(await(sum).intValue(), count * 2);
   }
