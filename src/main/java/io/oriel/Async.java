@@ -36,6 +36,7 @@ public abstract class Async<A> {
    * the computation in the process.
    */
   public CompletableFuture<A> toFuture() {
+    // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
 
@@ -58,6 +59,7 @@ public abstract class Async<A> {
    * <a href="https://en.wikipedia.org/wiki/Functor">Functor</a>.
    */
   public <B> Async<B> map(Function<A, B> f) {
+    // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
 
@@ -80,6 +82,7 @@ public abstract class Async<A> {
    * <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">Monad</a>.
    */
   public <B> Async<B> flatMap(Function<A, Async<B>> f) {
+    // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
 
@@ -99,6 +102,7 @@ public abstract class Async<A> {
    * </pre>
    */
   public static <A, B, C> Async<C> parMap2(Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
+    // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
 
@@ -106,9 +110,12 @@ public abstract class Async<A> {
    * Given a list of `Async` values, processes all of them and returns the
    * final result as a list.
    *
-   * SHOULD implement in terms of `flatMap`.
+   * Execution of the given list should be sequential (not parallel).
+   *
+   * SHOULD implement in terms of `flatMap` ;-)
    */
-  public static <A> Async<A[]> sequence(Async<A>[] list) {
+  public static <A> Async<A[]> sequence(Executor ec, Async<A>[] list) {
+    // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
 
@@ -116,15 +123,24 @@ public abstract class Async<A> {
    * Given a list of `Async` values, processes all of them in parallel and
    * returns the final result as a list.
    *
-   * SHOULD implement in terms of `parMap2`.
+   * Execution of the given list should be parallel.
+   *
+   * SHOULD implement in terms of `parMap2` ;-)
    */
-  public static <A> Async<A[]> parallel(Async<A>[] list) {
+  public static <A> Async<A[]> parallel(Executor ec, Async<A>[] list) {
+    // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
 
   /**
    * Describes an async computation that executes the given `thunk`
    * on the provided `Executor`.
+   *
+   * <pre>
+   * {@code
+   * Async<Integer> fa = Async.eval(() -> 1 + 1)
+   * }
+   * </pre>
    */
   public static <A> Async<A> eval(Executor ec, Supplier<A> thunk) {
     return new Async<A>(ec) {
