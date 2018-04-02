@@ -121,6 +121,7 @@ public abstract class Async<A> {
     return new Async<A>(ec) {
       @Override
       void run(Callback<A> cb) {
+        // Asynchronous boundary
         ec.execute(() -> {
           boolean streamError = true;
           try {
