@@ -77,8 +77,39 @@ public abstract class Async<A> {
   /**
    * Executes the two `Async` values in parallel, executing the given function for
    * producing a final result.
+   *
+   * <pre>
+   * {@code
+   * Async<Integer> fa = Async.eval(() -> 1 + 1)
+   *
+   * Async<Integer> fb = Async.eval(() -> 2 + 2)
+   *
+   * // Should yield 6
+   * Async<Integer> fc = Async.parMap2(fa, fb, (a, b) -> a + b)
+   * }
+   * </pre>
    */
   public static <A, B, C> Async<C> parMap2(Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
+    throw new NotImplementedException();
+  }
+
+  /**
+   * Given a list of `Async` values, processes all of them and returns the
+   * final result as a list.
+   *
+   * SHOULD implement in terms of `flatMap`.
+   */
+  public static <A> Async<A[]> sequence(Async<A>[] list) {
+    throw new NotImplementedException();
+  }
+
+  /**
+   * Given a list of `Async` values, processes all of them in parallel and
+   * returns the final result as a list.
+   *
+   * SHOULD implement in terms of `parMap2`.
+   */
+  public static <A> Async<A[]> parallel(Async<A>[] list) {
     throw new NotImplementedException();
   }
 
