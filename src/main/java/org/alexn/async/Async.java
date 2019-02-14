@@ -1,42 +1,48 @@
-package io.oriel;
+package org.alexn.async;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 /**
  * The `Async` data type is a lazy `Future`, i.e. a way to describe
  * asynchronous computations.
  *
- * It is described by {@link Async#run(Callback)}, it's characteristic
- * function. See {@link Async#eval(Executor, Supplier)} for how `Async`
+ * It is described by {@link Async#run(Executor,Callback)}, it's characteristic
+ * function. See {@link Async#eval(Supplier)} for how `Async`
  * values can be built.
  *
  * The assignment, should you wish to accept it, is to fill in the implementation
  * for all functions that are marked with `throw UnsupportedOperationException`.
  */
 public abstract class Async<A> {
-  /** Execution context. */
-  public final Executor context;
-
-  public Async(Executor ec) {
-    this.context = ec;
-  }
-
   /**
    * Characteristic function; every function that needs to be implemented
    * below should be based on calls to `run`.
+   *
+   * The `executor` is used to schedule tasks for execution.
+   * This is important for `flatMap` driven loops, because we need:
+   *
+   *   1. stack safety, since without an "interpreter", a long loop can blow
+   *      with a stack overflow
+   *   2. fairness, since a long loop can take forever to execute, so
+   *      by scheduling tasks on the thread pool we are giving a chance
+   *      for execution to other concurrent tasks
+   *
+   * @param executor is the thread-pool to use for ensuring fairness and stack-safety.
+   * @param cb is the callback called by the async process when the result is ready.
    */
-  abstract void run(Callback<A> cb);
+  abstract void run(Executor executor, Callback<A> cb);
 
   /**
    * Converts this `Async` to a Java `CompletableFuture`, triggering
    * the computation in the process.
+   *
+   * IMPLEMENTATION HINT: create a `CompletableFuture`, then call `run`
+   * (defined above).
    */
-  public CompletableFuture<A> toFuture() {
+  public CompletableFuture<A> toFuture(Executor executor) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -58,6 +64,11 @@ public abstract class Async<A> {
    * As a piece of trivia that you don't need to know for this
    * assignment, this function describes a Functor, see:
    * <a href="https://en.wikipedia.org/wiki/Functor">Functor</a>.
+   *
+   * IMPLEMENTATION HINT:
+   *
+   * Given that `self` is the source we are transforming, implement
+   * an `Async<B>` that's defined in terms of `self.run`.
    */
   public <B> Async<B> map(Function<A, B> f) {
     // TODO
@@ -81,6 +92,11 @@ public abstract class Async<A> {
    * As a piece of trivia that you don't need to know for this
    * assignment, this is the "monadic bind", see:
    * <a href="https://en.wikipedia.org/wiki/Monad_(functional_programming)">Monad</a>.
+   *
+   * IMPLEMENTATION HINT:
+   *
+   * Given that `self` is the source we are transforming, implement
+   * an `Async<B>` that's defined in terms of `self.run`.
    */
   public <B> Async<B> flatMap(Function<A, Async<B>> f) {
     // TODO
@@ -101,8 +117,20 @@ public abstract class Async<A> {
    * Async<Integer> fc = Async.parMap2(fa, fb, (a, b) -> a + b)
    * }
    * </pre>
+   *
+   * IMPLEMENTATION HINT:
+   *
+   * Implement an `Async<C>` instance that, on `run`, executes `fa.run` and `fb.run`
+   * like so:
+   *
+   *   1. execution should be parallel, via the given `executor` instances
+   *   2. on completion the execution should be synchronized and when both complete,
+   *      that's when the final result should be calculated and returned
+   *
+   * @param ec will be the `executor` attached to the newly created `Async` instance
+   * @param f is the function used to transform the final result
    */
-  public static <A, B, C> Async<C> parMap2(Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
+  public static <A, B, C> Async<C> parMap2(Executor ec, Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -113,7 +141,12 @@ public abstract class Async<A> {
    *
    * Execution of the given list should be sequential (not parallel).
    *
-   * SHOULD implement in terms of `flatMap` ;-)
+   * IMPLEMENTATION HINT:
+   *
+   * Can be implemented in terms of `flatMap`. You start with with an
+   * empty "accumulator" (list) and then execute the tasks one by one.
+   *
+   * Any implementation is accepted, as long as it works.
    */
   public static <A> Async<List<A>> sequence(Executor ec, List<Async<A>> list) {
     // TODO
@@ -126,7 +159,12 @@ public abstract class Async<A> {
    *
    * Execution of the given list should be parallel.
    *
-   * SHOULD implement in terms of `parMap2` ;-)
+   * IMPLEMENTATION HINT:
+   *
+   * Can be implemented in terms of `parMap2`. You start with with an
+   * empty "accumulator" (list) and then combine the tasks one by one.
+   *
+   * Any implementation is accepted, as long as it works.
    */
   public static <A> Async<List<A>> parallel(Executor ec, List<Async<A>> list) {
     // TODO
@@ -143,12 +181,12 @@ public abstract class Async<A> {
    * }
    * </pre>
    */
-  public static <A> Async<A> eval(Executor ec, Supplier<A> thunk) {
-    return new Async<A>(ec) {
+  public static <A> Async<A> eval(Supplier<A> thunk) {
+    return new Async<A>() {
       @Override
-      void run(Callback<A> cb) {
+      void run(Executor executor, Callback<A> cb) {
         // Asynchronous boundary
-        ec.execute(() -> {
+        executor.execute(() -> {
           boolean streamError = true;
           try {
             A value = thunk.get();
@@ -161,5 +199,27 @@ public abstract class Async<A> {
         });
       }
     };
+  }
+
+  /**
+   * Wraps an asynchronous process.
+   *
+   * See {@link Async#fromFuture(Supplier)} as example.
+   */
+  public static <A> Async<A> create(BiConsumer<Executor, Callback<A>> register) {
+    return new Async<A>() {
+      @Override
+      void run(Executor executor, Callback<A> cb) {
+        executor.execute(() -> register.accept(executor, cb));
+      }
+    };
+  }
+
+  /**
+   * Wraps a Java `Future` producer into an `Async` type.
+   */
+  public static <A> Async<A> fromFuture(Supplier<CompletableFuture<A>> f) {
+    // TODO: implement it in terms of `create`
+    throw new UnsupportedOperationException("Please implement!");
   }
 }
