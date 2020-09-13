@@ -173,7 +173,7 @@ public interface Async<A> {
   }
 
   /**
-   * Wraps an asynchronous process, in a safe `Async` implementation.
+   * Wraps an asynchronous process in a safe `Async` implementation.
    *
    * See {@link Async#fromFuture(Supplier)} as example.
    *
