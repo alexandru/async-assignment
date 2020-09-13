@@ -217,9 +217,15 @@ public abstract class Async<A> {
 
   /**
    * Wraps a Java `Future` producer into an `Async` type.
+   *
+   * The supplied value is a function, instead of a straight `Future`
+   * reference, because we want it to be lazily evaluated 😉
+   *
+   * IMPLEMENTATION HINT:
+   *
+   * Use {@link Async#create(BiConsumer)} described above.
    */
   public static <A> Async<A> fromFuture(Supplier<CompletableFuture<A>> f) {
-    // TODO: implement it in terms of `create`
     throw new UnsupportedOperationException("Please implement!");
   }
 }
