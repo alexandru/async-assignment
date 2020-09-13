@@ -9,7 +9,7 @@ could make the transition to Scala and Functional Programming 😎
 1. see [Async](./src/main/java/org/alexn/async/Async.java) and [Main](./src/main/java/org/alexn/async/Main.java)
 2. read the source code already in place
 3. implement the functions marked with `throw UnsupportedOperationException`
-    4. make sure the tests are passing, see [AsyncTests](./src/test/java/org/alexn/async/AsyncTests.java)
+    4. make sure the tests are passing, see [AsyncTest](./src/test/java/org/alexn/async/AsyncTest.java)
 
 To run the provided test suite:
 

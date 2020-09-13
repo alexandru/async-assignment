@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class AsyncTests {
+public class AsyncTest {
   private final int count = 10000;
   private ExecutorService ec;
 
