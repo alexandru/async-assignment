@@ -9,7 +9,7 @@ import java.util.function.*;
  * The `Async` data type is a lazy `Future`, i.e. a way to describe
  * asynchronous computations.
  *
- * It is described by {@link Async#run(Executor,Callback)}, it's characteristic
+ * It's described by {@link Async#run(Executor,Callback)}, its characteristic
  * function. See {@link Async#eval(Supplier)} for how `Async`
  * values can be built.
  *
@@ -183,20 +183,17 @@ public interface Async<A> {
    * </pre>
    */
   static <A> Async<A> eval(Supplier<A> thunk) {
-    return (executor, cb) -> {
-      // Asynchronous boundary
-      executor.execute(() -> {
-        boolean streamError = true;
-        try {
-          A value = thunk.get();
-          streamError = false;
-          cb.onSuccess(value);
-        } catch (Exception e) {
-          if (streamError) cb.onError(e);
-          else throw e;
-        }
-      });
-    };
+    return create((executor, cb) -> {
+      boolean streamError = true;
+      try {
+        A value = thunk.get();
+        streamError = false;
+        cb.onSuccess(value);
+      } catch (Exception e) {
+        if (streamError) cb.onError(e);
+        else throw e;
+      }
+    });
   }
 
   /**
@@ -206,7 +203,8 @@ public interface Async<A> {
    */
   static <A> Async<A> create(BiConsumer<Executor, Callback<A>> register) {
     return (executor, cb) ->
-      executor.execute(() -> register.accept(executor, cb));
+      // Forcing async boundary (via executor)
+      executor.execute(() -> register.accept(executor, Callback.safe(cb)));
   }
 
   /**
