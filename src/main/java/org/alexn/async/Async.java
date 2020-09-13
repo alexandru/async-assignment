@@ -173,6 +173,21 @@ public interface Async<A> {
   }
 
   /**
+   * Wraps an asynchronous process, in a safe `Async` implementation.
+   *
+   * See {@link Async#fromFuture(Supplier)} as example.
+   *
+   * @param start is a supplied function that should start the asynchronous
+   *              process; gets injected with a callback that can be used to
+   *              signal the final result
+   */
+  static <A> Async<A> create(BiConsumer<Executor, Callback<A>> start) {
+    return (executor, cb) ->
+      // Forcing async boundary (via executor)
+      executor.execute(() -> start.accept(executor, Callback.safe(cb)));
+  }
+
+  /**
    * Describes an async computation that executes the given `thunk`
    * on the provided `Executor`.
    *
@@ -197,17 +212,6 @@ public interface Async<A> {
   }
 
   /**
-   * Wraps an asynchronous process.
-   *
-   * See {@link Async#fromFuture(Supplier)} as example.
-   */
-  static <A> Async<A> create(BiConsumer<Executor, Callback<A>> register) {
-    return (executor, cb) ->
-      // Forcing async boundary (via executor)
-      executor.execute(() -> register.accept(executor, Callback.safe(cb)));
-  }
-
-  /**
    * Wraps a Java `Future` producer into an `Async` type.
    *
    * The supplied value is a function, instead of a straight `Future`
@@ -216,6 +220,7 @@ public interface Async<A> {
    * IMPLEMENTATION HINT:
    *
    * Use {@link Async#create(BiConsumer)} described above.
+   * See {@link Async#eval(Supplier)} for inspiration
    */
   static <A> Async<A> fromFuture(Supplier<CompletableFuture<A>> f) {
     throw new UnsupportedOperationException("Please implement!");
