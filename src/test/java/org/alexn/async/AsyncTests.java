@@ -9,6 +9,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AsyncTests {
   private final int count = 10000;
@@ -162,6 +163,31 @@ public class AsyncTests {
       .map(l -> l.stream().reduce(0, Integer::sum));
 
     assertEquals(await(sum, ec).intValue(), count * 2);
+  }
+
+  @Test
+  public void parMap2() throws InterruptedException, ExecutionException {
+    final CountDownLatch workersStarted = new CountDownLatch(2);
+    final CountDownLatch release = new CountDownLatch(1);
+
+    final Async<Integer> task = Async.eval(() -> {
+      workersStarted.countDown();
+      try {
+        assertTrue(release.await(10L, TimeUnit.SECONDS));
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+      return 10;
+    });
+
+    final CompletableFuture<Integer> result =
+      Async
+        .parMap2(ec, task, task, Integer::sum)
+        .toFuture(ec);
+
+    assertTrue(workersStarted.await(10L, TimeUnit.SECONDS));
+    release.countDown();
+    assertEquals(result.get().intValue(), 20);
   }
 
   @Test

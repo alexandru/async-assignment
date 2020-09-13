@@ -16,7 +16,8 @@ import java.util.function.*;
  * The assignment, should you wish to accept it, is to fill in the implementation
  * for all functions that are marked with `throw UnsupportedOperationException`.
  */
-public abstract class Async<A> {
+@FunctionalInterface
+public interface Async<A> {
   /**
    * Characteristic function; every function that needs to be implemented
    * below should be based on calls to `run`.
@@ -33,7 +34,7 @@ public abstract class Async<A> {
    * @param executor is the thread-pool to use for ensuring fairness and stack-safety.
    * @param cb is the callback called by the async process when the result is ready.
    */
-  abstract void run(Executor executor, Callback<A> cb);
+  void run(Executor executor, Callback<A> cb);
 
   /**
    * Converts this `Async` to a Java `CompletableFuture`, triggering
@@ -42,7 +43,7 @@ public abstract class Async<A> {
    * IMPLEMENTATION HINT: create a `CompletableFuture`, then call `run`
    * (defined above).
    */
-  public CompletableFuture<A> toFuture(Executor executor) {
+  default CompletableFuture<A> toFuture(Executor executor) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -70,7 +71,7 @@ public abstract class Async<A> {
    * Given that `self` is the source we are transforming, implement
    * an `Async<B>` that's defined in terms of `self.run`.
    */
-  public <B> Async<B> map(Function<A, B> f) {
+  default <B> Async<B> map(Function<A, B> f) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -98,7 +99,7 @@ public abstract class Async<A> {
    * Given that `self` is the source we are transforming, implement
    * an `Async<B>` that's defined in terms of `self.run`.
    */
-  public <B> Async<B> flatMap(Function<A, Async<B>> f) {
+  default <B> Async<B> flatMap(Function<A, Async<B>> f) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -130,7 +131,7 @@ public abstract class Async<A> {
    * @param ec will be the `executor` attached to the newly created `Async` instance
    * @param f is the function used to transform the final result
    */
-  public static <A, B, C> Async<C> parMap2(Executor ec, Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
+  static <A, B, C> Async<C> parMap2(Executor ec, Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -148,7 +149,7 @@ public abstract class Async<A> {
    *
    * Any implementation is accepted, as long as it works.
    */
-  public static <A> Async<List<A>> sequence(Executor ec, List<Async<A>> list) {
+  static <A> Async<List<A>> sequence(Executor ec, List<Async<A>> list) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -166,7 +167,7 @@ public abstract class Async<A> {
    *
    * Any implementation is accepted, as long as it works.
    */
-  public static <A> Async<List<A>> parallel(Executor ec, List<Async<A>> list) {
+  static <A> Async<List<A>> parallel(Executor ec, List<Async<A>> list) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -181,23 +182,20 @@ public abstract class Async<A> {
    * }
    * </pre>
    */
-  public static <A> Async<A> eval(Supplier<A> thunk) {
-    return new Async<A>() {
-      @Override
-      void run(Executor executor, Callback<A> cb) {
-        // Asynchronous boundary
-        executor.execute(() -> {
-          boolean streamError = true;
-          try {
-            A value = thunk.get();
-            streamError = false;
-            cb.onSuccess(value);
-          } catch (Exception e) {
-            if (streamError) cb.onError(e);
-            else throw e;
-          }
-        });
-      }
+  static <A> Async<A> eval(Supplier<A> thunk) {
+    return (executor, cb) -> {
+      // Asynchronous boundary
+      executor.execute(() -> {
+        boolean streamError = true;
+        try {
+          A value = thunk.get();
+          streamError = false;
+          cb.onSuccess(value);
+        } catch (Exception e) {
+          if (streamError) cb.onError(e);
+          else throw e;
+        }
+      });
     };
   }
 
@@ -206,13 +204,9 @@ public abstract class Async<A> {
    *
    * See {@link Async#fromFuture(Supplier)} as example.
    */
-  public static <A> Async<A> create(BiConsumer<Executor, Callback<A>> register) {
-    return new Async<A>() {
-      @Override
-      void run(Executor executor, Callback<A> cb) {
-        executor.execute(() -> register.accept(executor, cb));
-      }
-    };
+  static <A> Async<A> create(BiConsumer<Executor, Callback<A>> register) {
+    return (executor, cb) ->
+      executor.execute(() -> register.accept(executor, cb));
   }
 
   /**
@@ -225,7 +219,7 @@ public abstract class Async<A> {
    *
    * Use {@link Async#create(BiConsumer)} described above.
    */
-  public static <A> Async<A> fromFuture(Supplier<CompletableFuture<A>> f) {
+  static <A> Async<A> fromFuture(Supplier<CompletableFuture<A>> f) {
     throw new UnsupportedOperationException("Please implement!");
   }
 }
