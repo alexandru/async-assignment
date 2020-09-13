@@ -124,14 +124,13 @@ public interface Async<A> {
    * Implement an `Async<C>` instance that, on `run`, executes `fa.run` and `fb.run`
    * like so:
    *
-   *   1. execution should be parallel, via the given `executor` instances
+   *   1. execution should be parallel
    *   2. on completion the execution should be synchronized and when both complete,
    *      that's when the final result should be calculated and returned
    *
-   * @param ec will be the `executor` attached to the newly created `Async` instance
    * @param f is the function used to transform the final result
    */
-  static <A, B, C> Async<C> parMap2(Executor ec, Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
+  static <A, B, C> Async<C> parMap2(Async<A> fa, Async<B> fb, BiFunction<A, B, C> f) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -149,7 +148,7 @@ public interface Async<A> {
    *
    * Any implementation is accepted, as long as it works.
    */
-  static <A> Async<List<A>> sequence(Executor ec, List<Async<A>> list) {
+  static <A> Async<List<A>> sequence(List<Async<A>> list) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }
@@ -167,7 +166,7 @@ public interface Async<A> {
    *
    * Any implementation is accepted, as long as it works.
    */
-  static <A> Async<List<A>> parallel(Executor ec, List<Async<A>> list) {
+  static <A> Async<List<A>> parallel(List<Async<A>> list) {
     // TODO
     throw new UnsupportedOperationException("Please implement!");
   }

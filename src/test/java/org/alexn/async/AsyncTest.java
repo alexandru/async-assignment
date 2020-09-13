@@ -159,7 +159,7 @@ public class AsyncTest {
       list.add(Async.eval(() -> 1 + 1));
     }
 
-    Async<Integer> sum = Async.sequence(ec, list)
+    Async<Integer> sum = Async.sequence(list)
       .map(l -> l.stream().reduce(0, Integer::sum));
 
     assertEquals(await(sum, ec).intValue(), count * 2);
@@ -182,7 +182,7 @@ public class AsyncTest {
 
     final CompletableFuture<Integer> result =
       Async
-        .parMap2(ec, task, task, Integer::sum)
+        .parMap2(task, task, Integer::sum)
         .toFuture(ec);
 
     assertTrue(workersStarted.await(10L, TimeUnit.SECONDS));
@@ -197,7 +197,7 @@ public class AsyncTest {
       list.add(Async.eval(() -> 1 + 1));
     }
 
-    Async<Integer> sum = Async.parallel(ec, list)
+    Async<Integer> sum = Async.parallel(list)
       .map(l -> l.stream().reduce(0, Integer::sum));
 
     assertEquals(await(sum, ec).intValue(), count * 2);
