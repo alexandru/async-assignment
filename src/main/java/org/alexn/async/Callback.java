@@ -12,6 +12,10 @@ public interface Callback<A> {
     e.printStackTrace();
   }
 
+  /**
+   * Wraps the given callback implementation into one that
+   * can be safely called multiple times, ensuring "idempotence".
+   */
   static <A> Callback<A> safe(Callback<A> underlying) {
     return new Callback<A>() {
       private final AtomicBoolean wasCalled =
