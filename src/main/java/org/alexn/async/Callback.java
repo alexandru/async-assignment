@@ -1,16 +1,14 @@
 package org.alexn.async;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
-@FunctionalInterface
 public interface Callback<A> {
   /** To be called when the async process ends in success. */
   void onSuccess(A value);
 
   /** To be called when the async process ends in error. */
-  default void onError(Throwable e) {
-    e.printStackTrace();
-  }
+  void onError(Throwable e);
 
   /**
    * Wraps the given callback implementation into one that
@@ -34,6 +32,19 @@ public interface Callback<A> {
         else
           e.printStackTrace();
       }
+    };
+  }
+
+  /** 
+   * Converts a classic JavaScript-style callback.
+   */
+  static <A> Callback<A> fromClassicCallback(BiConsumer<Throwable, A> cb) {
+    return new Callback<A>() {
+      @Override
+      public void onSuccess(A value) { cb.accept(null, value); }
+
+      @Override
+      public void onError(Throwable e) { cb.accept(e, null); }
     };
   }
 }
