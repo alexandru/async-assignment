@@ -3,8 +3,6 @@
 The assignment is about finishing the implementation of the described `Async`
 data type — for educational purposes, or for interviewing. 
 
-`Async` is a data-type similar to [CompletableFuture](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html), except that the result isn't memoized, being a more "pure" abstraction.
-
 This assignment has been used (with mixed results) for spotting Java developers that 
 could make the transition to Scala and Functional Programming 😎
 
