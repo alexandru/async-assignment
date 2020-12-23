@@ -23,7 +23,7 @@ NOTE: the build tool used is [Apache Maven](https://maven.apache.org/).
 
 The described `Async` data type resembles Java's
 [CompletableFuture](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html),
-except that it behaves like a function instead of a variable.
+except that it behaves like a function instead of a variable. In other words, it does not do `memoization`, being a more "pure" abstraction (in the Functional Programming sense).
 
 Quick usage sample:
 
